@@ -1,4 +1,4 @@
-# google-scrape
+# google-search-scrape
 
 This script is using Selenium and Chrome driver to scrape Google's paid search results based on keywords. 
 
