@@ -11,3 +11,10 @@ The code is cleaning cookies and operating in Icognito mode.
 The final data output is pushed into a MySQL DB and in my project I visualise it in Power BI. 
 
 This script runs well for 5 minutes intervals and with 10 keywords. More that that I would suggest investigating running multiple instances of the Chrome driver.
+
+
+Input.csv: You add the keywords you want to search there
+g-scrape.py: Is the file you will need to run to perform the search and scraping
+Output: Is the folder which contains the output of the scrape in a CSV
+
+!!! I have kept the last output as an example 
