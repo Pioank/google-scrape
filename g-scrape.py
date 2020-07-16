@@ -15,6 +15,7 @@ from selenium.webdriver.chrome.options import Options
 now = datetime.now()
 current_time = now.strftime("%H:%M:%S")
 
+#Create lists to store the data while looping through the page elements
 titles=list()
 urls=list()
 position=list()
@@ -28,15 +29,17 @@ i=0
 today = datetime.today()
 d1 = today.strftime("%Y-%m-%d")
 
+# Create a CSV to save teh scraped data
 filename='output/output.csv'
 f=open(filename,'w',encoding='utf-8')    
 headers='date,time,device,keyword,company,position,title,url\n'
 f.write(headers)
 
-
+# Read the keywords from the input csv
 df=pd.read_csv('input.csv', delimiter = ',')
 n=len(df)
 
+# loop through the keywords from the input csv
 for row in df.head(n).itertuples():
     z=str(row.input)
     print(z)
@@ -46,6 +49,7 @@ for row in df.head(n).itertuples():
     while dev < 2:
         dev=dev+1
         
+        # If 1 or 2 is for scraping the results for both mobile and desktop. I could have done this with a def which takes in an extra argument to switch mobile desktop
         if dev ==1:
             opts = Options()
             opts.set_capability("browser.cache.disk.enable", False)
@@ -70,7 +74,7 @@ for row in df.head(n).itertuples():
             driver.delete_all_cookies()
             x=0
 
-        driver.get('https://google.com/search?q='+ z)
+        driver.get('https://google.com/search?q='+ z) #performs google search and where z is the keyword
 
         if dev ==1:
             adresults = driver.find_elements_by_class_name("ads-ad")
@@ -104,6 +108,7 @@ for row in df.head(n).itertuples():
                 search=str(titleval) + str(url)
                 search=search.lower()
 
+                # Long look up to identify the company
                 if 'betway' in search: company = 'Betway'
                 elif 'william' in search: company = 'Williamhill'
                 elif 'ladbrokes' in search: company = 'Ladbrokes'
@@ -169,41 +174,24 @@ for row in df.head(n).itertuples():
                 elif dev == 2:
                     device.append('Mobile')
                     print('Mobile')
-
-
-
+                    
         driver.quit()
-
 
 run=len(urls)
 
+# Output in a CSV
 while i < run:
     f.write(d1 + ',' + times[i] + ',' + device[i] + ',' + keyword[i] + ',' + companies[i] + ',' + str(position[i]) + ',' + titles[i] + ',' + urls[i] + '\n')
     i=i+1
 
-
-
-
-mydb = mysql.connector.connect(
-    host="eu-cdbr-west-02.cleardb.net",
-    user="ba22ee85e45681",
-    passwd="8cb20161",
-    database="heroku_99b6482f61201f9"
-)
-
-#host="remotemysql.com",
-#user="IhjHetQdWt",
-#passwd="ZiYPT8d5mZ",
-#database="IhjHetQdWt"
-
+mydb = mysql.connector.connect( host="", user="", passwd="", database="")
 cur = mydb.cursor(buffered=True)
 
-#cur.execute('''CREATE TABLE PPCRESULTS (date DATE NOT NULL, time TIME NOT NULL, device varchar(14) NOT NULL, keyword varchar(30) NOT NULL, company varchar(30) NOT NULL, position int(3) NOT NULL, title varchar(300) NOT NULL, url varchar(300) NOT NULL)''')
+# To create the table - in other scraping scripts I have used the try / except method to check if table exists
+#cur.execute('''CREATE TABLE tablename (date DATE NOT NULL, time TIME NOT NULL, device varchar(14) NOT NULL, keyword varchar(30) NOT NULL, company varchar(30) NOT NULL, position int(3) NOT NULL, title varchar(300) NOT NULL, url varchar(300) NOT NULL)''')
 
-
-
+# A more crude way to push data. In other scraping scripts I have used SQL Alchemy where you pass the data in a df form with 2 lines of code
 i=0
-
 while i<run:
 
     a1=d1
@@ -214,15 +202,9 @@ while i<run:
     a6=position[i]
     a7=titles[i]
     a8=urls[i]
-
     cur.execute('''INSERT INTO PPCRESULTS (date, time, device, keyword, company, position, title, url) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)''',(a1,a2,a3,a4,a5,a6,a7,a8))
-
-    
-
-    #('''INSERT INTO PPCRESULTS (date, time, device, keyword, company, position, title, url) VALUES (%s, %s, %s, %s, %s, %s, %s, %s),(a1,a2,a3,a4,a5,a6,a7,a8)''')
     mydb.commit()
     i=i+1
-
 
 cur.close()
 
